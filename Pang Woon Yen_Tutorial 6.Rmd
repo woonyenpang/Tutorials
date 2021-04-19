@@ -1,0 +1,65 @@
+---
+title: "Tutorial6"
+author: "Pang Woon Yen"
+date: "20/04/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(shiny)
+library(MASS)
+
+# rsconnect::setAccountInfo(name='woonyen', token='E0BCFB6D868B3D64AA05ABDFDE44AC64', secret='HGGajaKjZt+fQVDyu+8zSr6EkOoDzxd27OCs9wXj')
+# 
+# library(rsconnect)
+# rsconnect::deployApp()
+
+#load dataset Old Faithful Geyser Data
+data("faithful")
+
+ui <- shinyUI(fluidPage(
+    headerPanel("Old Faithful Data Visualisation"),
+    
+    sidebarPanel(
+        selectInput('var', "Select a variable: ", names(faithful)),
+        br(),
+        radioButtons('type', "Display the chart in:", c("Histogram", "Boxplot")),
+        br(),
+        submitButton('Submit')
+    ),
+    
+    mainPanel(
+        h3("Variable selected for visualization:"),
+        verbatimTextOutput("input_var"),
+        h3("Chart type:"),
+        verbatimTextOutput("input_type"),
+        plotOutput("plot1")
+    )
+)
+)
+
+visual <- function(type,column) {
+    df <- faithful[, c(column)]
+    
+    if(type=="Histogram") {
+        hist(df, xlab = column, main = paste(type, ' of ', column))
+    } else {
+        boxplot(df, main = paste(type, ' of ', column))
+    }
+}
+
+server <- function(input, output) {
+    output$input_var <- renderPrint({input$var})
+    output$input_type <- renderPrint({input$type})
+    
+    output$plot1 <- renderPlot({visual(input$type, input$var)})
+    
+}
+
+shinyApp(ui = ui, server = server)
+
+```
